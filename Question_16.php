@@ -1,61 +1,38 @@
 <?php
 
-class Waiter {
-    private array $tables = [];
+class Table {}
 
-    public function addTable(Table $table): void {
-        $this->tables[] = $table;
+class Waiter {
+    public function __construct(private array $tables = []) {
     }
 
-    public function removeTable(Table $table): void {
+    public function addTable(Table $table) {
+        if (count($this->tables) >= 4) {
+            throw new Exception('A waiter cannot be assigned to more than four tables.');
+        }
+        if(!in_array($table, $this->tables, true)){
+            $this->tables[] = $table;
+            return true;
+        }
+        return false;
+        // array_push($this->tables, $table);
+    }
+
+    public function removeTable(Table $table) {
         $key = array_search($table, $this->tables);
         if ($key !== false) {
-            unset($this->tables[$key]);
+            array_splice($this->tables, $key, 1);
+        } else {
+            throw new Exception('This table is not assigned to this waiter.');
         }
     }
-
-    public function getTables(): array {
-        return $this->tables;
-    }
 }
+// Create a waiter and tables
 
-class Table {
-    private $waiters = [];
+$table1 = new Table();
+$table2 = new Table();
+// $table3 = new Table();
+// $table4 = new Table();
 
-    public function addWaiter(Waiter $waiter) : Table {
-        if (!in_array($waiter, $this->waiters)) {
-            $this->waiters[] = $waiter;
-            $waiter->addTable($this);
-        }
-        return $this;
-    }
-
-    public function removeWaiter(Waiter $waiter) : Table {
-        if (($key = array_search($waiter, $this->waiters)) !== false) {
-            unset($this->waiters[$key]);
-            $waiter->removeTable($this);
-        }
-        return $this;
-    }
-
-    public function getWaiters() : array {
-        return $this->waiters;
-    }
-}
-
-try {
-    $waiter1 = new Waiter();
-    $waiter2 = new Waiter();
-    $table1 = new Table();
-    $table2 = new Table();
-
-    // Un waiter peut avoir 0 à n tables
-    $waiter1->addTable($table1);
-    $waiter1->addTable($table2);
-    $waiter2->addTable($table1);
-
-    // Exception: une table peut seulement être associée à un seul waiter
-    $waiter2->addTable($table2);
-} catch (Exception $e) {
-    echo 'Erreur: ' . $e->getMessage();
-}
+$waiter = new Waiter([$table1 ,$table2]);
+var_dump($waiter);
